@@ -16,18 +16,57 @@ function changeLanguage(lang) {
     document.querySelectorAll('.lang-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.lang === lang);
     });
-    // Afficher le guide pour changer dans le player
-    const guide = document.getElementById('langGuide');
-    if (guide) {
-        if (lang === 'fr') {
-            guide.innerHTML = `<i class="fas fa-info-circle"></i> Pour le <strong>doublage français</strong>, cliquez sur le sélecteur de langue 🌐 dans le player vidéo et choisissez <strong>\"Français\"</strong>.`;
-        } else if (lang === 'en') {
-            guide.innerHTML = `<i class="fas fa-info-circle"></i> Pour l'<strong>audio original (anglais)</strong>, sélectionnez <strong>\"English\"</strong> dans le player.`;
-        } else {
-            guide.innerHTML = `<i class="fas fa-info-circle"></i> Sélectionnez la langue dans le player vidéo. `;
-        }
-        guide.style.display = 'flex';
+    // Afficher l'overlay guide
+    if (lang === 'fr') {
+        showLangGuideOverlay();
+    } else {
+        hideLangGuideOverlay();
     }
+}
+
+// Overlay guide pour le VF
+function showLangGuideOverlay() {
+    let overlay = document.getElementById('langGuideOverlay');
+    if (!overlay) {
+        const container = document.querySelector('.video-container');
+        overlay = document.createElement('div');
+        overlay.id = 'langGuideOverlay';
+        overlay.className = 'lang-guide-overlay';
+        overlay.innerHTML = `
+            <div class="lang-guide-content">
+                <div class="lang-guide-title">
+                    <i class="fas fa-language"></i> Comment passer en Français ?
+                </div>
+                <div class="lang-guide-steps">
+                    <div class="lang-step">
+                        <span class="step-num">1</span>
+                        <span>Cliquez sur <strong>"Vidstream"</strong> ou un autre serveur dans le player</span>
+                    </div>
+                    <div class="lang-step">
+                        <span class="step-num">2</span>
+                        <span>Cliquez sur l'icône <strong>🌐 (globe)</strong> en bas du player</span>
+                    </div>
+                    <div class="lang-step">
+                        <span class="step-num">3</span>
+                        <span>Sélectionnez <strong>"French"</strong> ou <strong>"Français"</strong></span>
+                    </div>
+                </div>
+                <button class="lang-guide-close" onclick="hideLangGuideOverlay()">
+                    <i class="fas fa-check"></i> J'ai compris
+                </button>
+            </div>
+        `;
+        if (container) {
+            container.style.position = 'relative';
+            container.appendChild(overlay);
+        }
+    }
+    overlay.classList.add('visible');
+}
+
+function hideLangGuideOverlay() {
+    const overlay = document.getElementById('langGuideOverlay');
+    if (overlay) overlay.classList.remove('visible');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -364,6 +403,10 @@ async function showContentModal(type, id) {
 
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
+        // Auto-afficher le guide VF si sélectionné
+        if (currentLang === 'fr') {
+            setTimeout(() => showLangGuideOverlay(), 500);
+        }
 
     } catch (error) {
         console.error('Erreur chargement détails:', error);
@@ -463,6 +506,10 @@ async function showAnimeModal(id) {
 
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
+        // Auto-afficher le guide VF si sélectionné
+        if (currentLang === 'fr') {
+            setTimeout(() => showLangGuideOverlay(), 500);
+        }
 
     } catch (error) {
         console.error('Erreur chargement anime:', error);
@@ -478,9 +525,6 @@ function createLangSelector() {
         { code: 'fr', label: '🇫🇷 VF', title: 'Doublage Français' },
         { code: 'en', label: '🇬🇧 VO', title: 'Version Originale (Anglais)' },
     ];
-    const defaultGuide = currentLang === 'fr'
-        ? `<i class="fas fa-info-circle"></i> Pour le <strong>doublage français</strong>, cliquez sur le sélecteur de langue 🌐 dans le player vidéo et choisissez <strong>\"Français\"</strong>.`
-        : `<i class="fas fa-info-circle"></i> Sélectionnez la langue dans le player vidéo.`;
     return `
         <div class="lang-selector">
             <span class="lang-label"><i class="fas fa-globe"></i> Langue :</span>
@@ -492,9 +536,6 @@ function createLangSelector() {
                     ${l.label}
                 </button>
             `).join('')}
-        </div>
-        <div class="lang-guide" id="langGuide">
-            ${defaultGuide}
         </div>
     `;
 }
