@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Séries - StreamZone</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar scrolled">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-play-circle"></i>
+                <span>StreamZone</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html">Accueil</a></li>
+                <li><a href="movies.html">Films</a></li>
+                <li><a href="anime.html">Animés</a></li>
+                <li><a href="series.html" class="active">Séries</a></li>
+            </ul>
+            <div class="nav-right">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Rechercher...">
+                    <i class="fas fa-search"></i>
+                </div>
+                <a href="#" class="btn-login">Connexion</a>
+            </div>
+            <button class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="page-header-content">
+            <h1><i class="fas fa-tv"></i> Séries</h1>
+            <p>Les meilleures séries du moment</p>
+        </div>
+    </section>
+
+    <!-- Content Grid -->
+    <main class="main-content">
+        <div class="content-grid" id="seriesGrid">
+            <div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Chargement des séries...</div>
+        </div>
+        
+        <!-- Load More Button -->
+        <div style="text-align: center; margin-top: 2rem;">
+            <button class="btn-primary" id="loadMoreBtn" onclick="loadMoreSeries()" style="display: none;">
+                <i class="fas fa-plus"></i> Charger plus de séries
+            </button>
+        </div>
+    </main>
+
+    <!-- Video Player Modal -->
+    <div class="video-modal" id="videoModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="video-container">
+                <video id="videoPlayer" controls>
+                    <source src="" type="video/mp4">
+                    Votre navigateur ne supporte pas la vidéo HTML5.
+                </video>
+            </div>
+            <div class="modal-info">
+                <h3 id="modalTitle"></h3>
+                <p id="modalDescription"></p>
+                <div class="modal-meta">
+                    <span id="modalYear"></span>
+                    <span id="modalRating"></span>
+                    <span id="modalDuration"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div class="video-modal" id="authModal">
+        <div class="modal-content" style="max-width: 400px;">
+            <button class="modal-close" onclick="closeAuthModal()">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="auth-container">
+                <h2><i class="fas fa-play-circle"></i> StreamZone</h2>
+                
+                <div class="auth-tabs">
+                    <button class="auth-tab active" onclick="showTab('login')">Connexion</button>
+                    <button class="auth-tab" onclick="showTab('register')">Inscription</button>
+                </div>
+
+                <form id="loginForm" class="auth-form" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label><i class="fas fa-envelope"></i> Email</label>
+                        <input type="email" id="loginEmail" required placeholder="votre@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-lock"></i> Mot de passe</label>
+                        <input type="password" id="loginPassword" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn-primary" style="width: 100%; justify-content: center;">
+                        <i class="fas fa-sign-in-alt"></i> Se connecter
+                    </button>
+                </form>
+
+                <form id="registerForm" class="auth-form" style="display: none;" onsubmit="handleRegister(event)">
+                    <div class="form-group">
+                        <label><i class="fas fa-user"></i> Nom d'utilisateur</label>
+                        <input type="text" id="registerUsername" required placeholder="Votre pseudo">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-envelope"></i> Email</label>
+                        <input type="email" id="registerEmail" required placeholder="votre@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-lock"></i> Mot de passe</label>
+                        <input type="password" id="registerPassword" required placeholder="••••••••" minlength="6">
+                    </div>
+                    <button type="submit" class="btn-primary" style="width: 100%; justify-content: center;">
+                        <i class="fas fa-user-plus"></i> Créer un compte
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Menu -->
+    <div class="user-menu" id="userMenu">
+        <a href="#" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3><i class="fas fa-play-circle"></i> StreamZone</h3>
+                <p>Votre destination streaming pour films, séries et animés.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Navigation</h4>
+                <ul>
+                    <li><a href="index.html">Accueil</a></li>
+                    <li><a href="movies.html">Films</a></li>
+                    <li><a href="anime.html">Animés</a></li>
+                    <li><a href="series.html">Séries</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Légal</h4>
+                <ul>
+                    <li><a href="#">Conditions d'utilisation</a></li>
+                    <li><a href="#">Politique de confidentialité</a></li>
+                    <li><a href="#">DMCA</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Contact</h4>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-discord"></i></a>
+                    <a href="#"><i class="fab fa-reddit"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 StreamZone. Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <script src="api.js"></script>
+    <script src="script.js"></script>
+    <script>
+        let currentPage = 1;
+        let allSeries = [];
+
+        // Load series on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadSeries();
+        });
+
+        async function loadSeries() {
+            try {
+                const data = await API.series.getPopular(currentPage);
+                allSeries = [...allSeries, ...(data.results || [])];
+                renderSeriesGrid(allSeries);
+                
+                // Show load more button if there are more pages
+                const loadMoreBtn = document.getElementById('loadMoreBtn');
+                if (data.total_pages && currentPage < data.total_pages) {
+                    loadMoreBtn.style.display = 'inline-flex';
+                } else {
+                    loadMoreBtn.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error loading series:', error);
+                document.getElementById('seriesGrid').innerHTML = `
+                    <div class="loading-spinner">
+                        <i class="fas fa-exclamation-circle"></i> Erreur lors du chargement des séries
+                    </div>
+                `;
+            }
+        }
+
+        function loadMoreSeries() {
+            currentPage++;
+            loadSeries();
+        }
+
+        function renderSeriesGrid(series) {
+            const grid = document.getElementById('seriesGrid');
+            if (!grid) return;
+
+            grid.innerHTML = series.map(item => {
+                const imageUrl = item.poster_url || `https://image.tmdb.org/t/p/w500${item.poster_path}`;
+                const title = item.title || item.name;
+                const rating = item.vote_average?.toFixed(1) || 'N/A';
+                const year = (item.first_air_date || '').substring(0, 4);
+                const seasons = item.number_of_seasons ? `${item.number_of_seasons} saisons` : '';
+
+                return `
+                    <div class="content-card grid-card" onclick="showContentModal('series', '${item.id}')">
+                        <img src="${imageUrl}" alt="${title}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'">
+                        <div class="card-badge">Série</div>
+                        <div class="card-rating">
+                            <i class="fas fa-star"></i> ${rating}
+                        </div>
+                        <div class="card-overlay">
+                            <div class="card-title">${title}</div>
+                            <div class="card-meta">
+                                ${year ? `<span><i class="fas fa-calendar"></i> ${year}</span>` : ''}
+                                ${seasons ? `<span><i class="fas fa-tv"></i> ${seasons}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Search functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('searchInput');
+            let searchTimeout;
+
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                const query = e.target.value.trim();
+                
+                if (query.length < 2) {
+                    allSeries = [];
+                    currentPage = 1;
+                    loadSeries();
+                    return;
+                }
+
+                searchTimeout = setTimeout(async () => {
+                    try {
+                        const data = await API.movies.search(query);
+                        renderSeriesGrid(data.results || []);
+                    } catch (error) {
+                        console.error('Search error:', error);
+                    }
+                }, 300);
+            });
+        });
+
+        function showTab(tab) {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const tabs = document.querySelectorAll('.auth-tab');
+            
+            tabs.forEach(t => t.classList.remove('active'));
+            
+            if (tab === 'login') {
+                loginForm.style.display = 'block';
+                registerForm.style.display = 'none';
+                tabs[0].classList.add('active');
+            } else {
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'block';
+                tabs[1].classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>

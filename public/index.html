@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreamZone - Streaming Gratuit</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-play-circle"></i>
+                <span>StreamZone</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html" class="active">Accueil</a></li>
+                <li><a href="movies.html">Films</a></li>
+                <li><a href="anime.html">Animés</a></li>
+                <li><a href="series.html">Séries</a></li>
+            </ul>
+            <div class="nav-right">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Rechercher...">
+                    <i class="fas fa-search"></i>
+                </div>
+                <button class="btn-theme" onclick="toggleTheme()" title="Changer le thème">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <a href="#" class="btn-login">Connexion</a>
+            </div>
+            <button class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">Découvrez l'univers du streaming</h1>
+            <p class="hero-description">Films, séries et animés en haute qualité. Regardez où et quand vous voulez.</p>
+            <div class="hero-buttons">
+                <button class="btn-primary" onclick="document.getElementById('trendingSlider').scrollIntoView({behavior: 'smooth'})">
+                    <i class="fas fa-play"></i> Découvrir
+                </button>
+                <button class="btn-secondary" onclick="showAuthModal()">
+                    <i class="fas fa-user-plus"></i> S'inscrire
+                </button>
+            </div>
+        </div>
+        <div class="hero-overlay"></div>
+    </section>
+
+    <!-- Content Sections -->
+    <main class="main-content">
+        <!-- Tendances -->
+        <section class="content-section">
+            <div class="section-header">
+                <h2><i class="fas fa-fire"></i> Tendances de la semaine</h2>
+            </div>
+            <div class="content-slider" id="trendingSlider">
+                <div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Chargement...</div>
+            </div>
+        </section>
+
+        <!-- Films Populaires -->
+        <section class="content-section">
+            <div class="section-header">
+                <h2><i class="fas fa-film"></i> Films Populaires</h2>
+                <a href="movies.html" class="see-all">Voir tout <i class="fas fa-chevron-right"></i></a>
+            </div>
+            <div class="content-slider" id="moviesSlider">
+                <div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Chargement...</div>
+            </div>
+        </section>
+
+        <!-- Animés Populaires -->
+        <section class="content-section">
+            <div class="section-header">
+                <h2><i class="fas fa-dragon"></i> Animés Populaires</h2>
+                <a href="anime.html" class="see-all">Voir tout <i class="fas fa-chevron-right"></i></a>
+            </div>
+            <div class="content-slider" id="animeSlider">
+                <div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Chargement...</div>
+            </div>
+        </section>
+
+        <!-- Séries -->
+        <section class="content-section">
+            <div class="section-header">
+                <h2><i class="fas fa-tv"></i> Séries du moment</h2>
+                <a href="series.html" class="see-all">Voir tout <i class="fas fa-chevron-right"></i></a>
+            </div>
+            <div class="content-slider" id="seriesSlider">
+                <div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Chargement...</div>
+            </div>
+        </section>
+
+        <!-- Films à venir -->
+        <section class="content-section">
+            <div class="section-header">
+                <h2><i class="fas fa-calendar-alt"></i> À venir</h2>
+            </div>
+            <div class="content-slider" id="upcomingSlider">
+                <div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Chargement...</div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Video Player Modal -->
+    <div class="video-modal" id="videoModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="video-container">
+                <video id="videoPlayer" controls>
+                    <source src="" type="video/mp4">
+                    Votre navigateur ne supporte pas la vidéo HTML5.
+                </video>
+            </div>
+            <div class="modal-info">
+                <h3 id="modalTitle"></h3>
+                <p id="modalDescription"></p>
+                <div class="modal-meta">
+                    <span id="modalYear"></span>
+                    <span id="modalRating"></span>
+                    <span id="modalDuration"></span>
+                </div>
+                <div id="similarContent" class="similar-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div class="video-modal" id="authModal">
+        <div class="modal-content" style="max-width: 400px;">
+            <button class="modal-close" onclick="closeAuthModal()">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="auth-container">
+                <h2><i class="fas fa-play-circle"></i> StreamZone</h2>
+                
+                <div class="auth-tabs">
+                    <button class="auth-tab active" onclick="showTab('login')">Connexion</button>
+                    <button class="auth-tab" onclick="showTab('register')">Inscription</button>
+                </div>
+
+                <form id="loginForm" class="auth-form" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label><i class="fas fa-envelope"></i> Email</label>
+                        <input type="email" id="loginEmail" required placeholder="votre@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-lock"></i> Mot de passe</label>
+                        <input type="password" id="loginPassword" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn-primary" style="width: 100%; justify-content: center;">
+                        <i class="fas fa-sign-in-alt"></i> Se connecter
+                    </button>
+                </form>
+
+                <form id="registerForm" class="auth-form" style="display: none;" onsubmit="handleRegister(event)">
+                    <div class="form-group">
+                        <label><i class="fas fa-user"></i> Nom d'utilisateur</label>
+                        <input type="text" id="registerUsername" required placeholder="Votre pseudo">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-envelope"></i> Email</label>
+                        <input type="email" id="registerEmail" required placeholder="votre@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-lock"></i> Mot de passe</label>
+                        <input type="password" id="registerPassword" required placeholder="••••••••" minlength="6">
+                    </div>
+                    <button type="submit" class="btn-primary" style="width: 100%; justify-content: center;">
+                        <i class="fas fa-user-plus"></i> Créer un compte
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Menu -->
+    <div class="user-menu" id="userMenu">
+        <a href="#" onclick="showProfile()"><i class="fas fa-user"></i> Mon profil</a>
+        <a href="#" onclick="showFavorites()"><i class="fas fa-heart"></i> Mes favoris</a>
+        <a href="#" onclick="showHistory()"><i class="fas fa-history"></i> Historique</a>
+        <a href="#" onclick="showLists()"><i class="fas fa-list"></i> Mes listes</a>
+        <hr style="border-color: rgba(255,255,255,0.1); margin: 0.5rem 0;">
+        <a href="#" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
+    </div>
+
+    <!-- Favorites Modal -->
+    <div class="video-modal" id="favoritesModal">
+        <div class="modal-content" style="max-width: 800px;">
+            <button class="modal-close" onclick="closeFavoritesModal()">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="modal-info">
+                <h3><i class="fas fa-heart"></i> Mes Favoris</h3>
+                <div id="favoritesList" class="favorites-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lists Modal -->
+    <div class="video-modal" id="listsModal">
+        <div class="modal-content" style="max-width: 800px;">
+            <button class="modal-close" onclick="closeListsModal()">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="modal-info">
+                <h3><i class="fas fa-list"></i> Mes Listes</h3>
+                <button class="btn-primary" onclick="createNewList()" style="margin-bottom: 1rem;">
+                    <i class="fas fa-plus"></i> Créer une liste
+                </button>
+                <div id="userLists" class="lists-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3><i class="fas fa-play-circle"></i> StreamZone</h3>
+                <p>Votre destination streaming pour films, séries et animés.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Navigation</h4>
+                <ul>
+                    <li><a href="index.html">Accueil</a></li>
+                    <li><a href="movies.html">Films</a></li>
+                    <li><a href="anime.html">Animés</a></li>
+                    <li><a href="series.html">Séries</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Légal</h4>
+                <ul>
+                    <li><a href="#">Conditions d'utilisation</a></li>
+                    <li><a href="#">Politique de confidentialité</a></li>
+                    <li><a href="#">DMCA</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Contact</h4>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-discord"></i></a>
+                    <a href="#"><i class="fab fa-reddit"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 StreamZone. Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <script src="api.js"></script>
+    <script src="script.js"></script>
+    <script>
+        // Theme toggle
+        function toggleTheme() {
+            document.body.classList.toggle('light-theme');
+            const icon = document.querySelector('.btn-theme i');
+            if (document.body.classList.contains('light-theme')) {
+                icon.className = 'fas fa-sun';
+                localStorage.setItem('theme', 'light');
+            } else {
+                icon.className = 'fas fa-moon';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Load saved theme
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light-theme');
+            document.querySelector('.btn-theme i').className = 'fas fa-sun';
+        }
+
+        function showTab(tab) {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const tabs = document.querySelectorAll('.auth-tab');
+            
+            tabs.forEach(t => t.classList.remove('active'));
+            
+            if (tab === 'login') {
+                loginForm.style.display = 'block';
+                registerForm.style.display = 'none';
+                tabs[0].classList.add('active');
+            } else {
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'block';
+                tabs[1].classList.add('active');
+            }
+        }
+
+        // Favorites modal
+        function closeFavoritesModal() {
+            document.getElementById('favoritesModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Lists modal
+        function closeListsModal() {
+            document.getElementById('listsModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        async function showFavorites() {
+            closeUserMenu();
+            const token = localStorage.getItem('token');
+            if (!token) {
+                showAuthModal();
+                return;
+            }
+
+            try {
+                const data = await API.favorites.getAll();
+                const favoritesList = document.getElementById('favoritesList');
+                
+                if (!data.favorites || data.favorites.length === 0) {
+                    favoritesList.innerHTML = '<p style="text-align: center; color: #b3b3b3; padding: 2rem;">Aucun favori pour le moment</p>';
+                } else {
+                    favoritesList.innerHTML = data.favorites.map(fav => `
+                        <div class="favorite-item">
+                            <img src="${fav.poster_url || 'https://via.placeholder.com/100x150?text=No+Image'}" alt="${fav.title}">
+                            <div class="favorite-info">
+                                <h4>${fav.title}</h4>
+                                <span>${fav.content_type === 'anime' ? 'Animé' : fav.content_type === 'series' ? 'Série' : 'Film'}</span>
+                            </div>
+                            <button class="btn-remove" onclick="removeFavorite(${fav.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `).join('');
+                }
+
+                document.getElementById('favoritesModal').classList.add('active');
+                document.body.style.overflow = 'hidden';
+            } catch (error) {
+                console.error('Error loading favorites:', error);
+            }
+        }
+
+        async function removeFavorite(id) {
+            try {
+                await API.favorites.remove(id);
+                showFavorites();
+            } catch (error) {
+                console.error('Error removing favorite:', error);
+            }
+        }
+
+        async function showHistory() {
+            closeUserMenu();
+            const token = localStorage.getItem('token');
+            if (!token) {
+                showAuthModal();
+                return;
+            }
+
+            try {
+                const data = await API.history.getAll();
+                // Show history in a simple alert for now
+                if (!data.history || data.history.length === 0) {
+                    alert('Aucun historique pour le moment');
+                } else {
+                    const historyList = data.history.map(h => h.title).join('\n');
+                    alert('Historique:\n' + historyList);
+                }
+            } catch (error) {
+                console.error('Error loading history:', error);
+            }
+        }
+
+        async function showLists() {
+            closeUserMenu();
+            const user = JSON.parse(localStorage.getItem('user') || 'null');
+            if (!user) {
+                showAuthModal();
+                return;
+            }
+
+            const lists = JSON.parse(localStorage.getItem('streamzone_lists') || '[]');
+            const userLists = document.getElementById('userLists');
+            
+            if (lists.length === 0) {
+                userLists.innerHTML = '<p style="text-align: center; color: #b3b3b3; padding: 2rem;">Aucune liste pour le moment</p>';
+            } else {
+                userLists.innerHTML = lists.map(list => `
+                    <div class="list-item">
+                        <h4><i class="fas fa-list"></i> ${list.name}</h4>
+                        <span>Créée le ${new Date(list.created_at).toLocaleDateString('fr-FR')}</span>
+                    </div>
+                `).join('');
+            }
+
+            document.getElementById('listsModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function createNewList() {
+            const name = prompt('Nom de la nouvelle liste:');
+            if (!name) return;
+
+            const lists = JSON.parse(localStorage.getItem('streamzone_lists') || '[]');
+            lists.push({ id: Date.now(), name, created_at: new Date().toISOString() });
+            localStorage.setItem('streamzone_lists', JSON.stringify(lists));
+            showLists();
+        }
+
+        function showProfile() {
+            closeUserMenu();
+            const user = JSON.parse(localStorage.getItem('user') || 'null');
+            if (user) {
+                alert(`Profil:\nNom: ${user.username}\nEmail: ${user.email}`);
+            }
+        }
+    </script>
+</body>
+</html>
