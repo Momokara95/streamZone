@@ -1389,8 +1389,7 @@ ul {
 .lang-guide-overlay {
     position: relative;
     width: 100%;
-    background: rgba(0, 0, 0, 0.9);
-    display: none;
+    display: flex;
     align-items: center;
     justify-content: center;
     z-index: 3000;
@@ -1399,10 +1398,7 @@ ul {
     padding: 2rem;
     animation: fadeIn 0.3s ease;
     border: 2px solid var(--primary);
-}
-
-.lang-guide-overlay.visible {
-    display: flex;
+    background: rgba(0, 0, 0, 0.95);
 }
 
 .lang-guide-content {

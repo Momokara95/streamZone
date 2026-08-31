@@ -24,43 +24,46 @@ function changeLanguage(lang) {
     }
 }
 
-// Overlay guide pour le VF - placé dans le MODAL (au-dessus de tout)
+// Overlay guide pour le VF
 function showLangGuideOverlay() {
-    let overlay = document.getElementById('langGuideOverlay');
-    if (!overlay) {
-        // Chercher le conteneur du modal (pas la video-container, car l'iframe cache tout)
-        const modalContent = document.querySelector('.modal-content');
-        if (!modalContent) return;
-        overlay = document.createElement('div');
-        overlay.id = 'langGuideOverlay';
-        overlay.className = 'lang-guide-overlay';
-        overlay.innerHTML = `
-            <div class="lang-guide-content">
-                <div class="lang-guide-title">
-                    <i class="fas fa-language"></i> Comment passer en Français ?
-                </div>
-                <div class="lang-guide-steps">
-                    <div class="lang-step">
-                        <span class="step-num">1</span>
-                        <span>Cliquez sur un <strong>serveur</strong> dans le player (ex: Vidstream)</span>
-                    </div>
-                    <div class="lang-step">
-                        <span class="step-num">2</span>
-                        <span>Cliquez sur l'icône <strong>🌐 (globe)</strong> en bas du player</span>
-                    </div>
-                    <div class="lang-step">
-                        <span class="step-num">3</span>
-                        <span>Sélectionnez <strong>\"French\"</strong> ou <strong>\"Français\"</strong></span>
-                    </div>
-                </div>
-                <button class="lang-guide-close" onclick="hideLangGuideOverlay()">
-                    <i class="fas fa-check"></i> J'ai compris
-                </button>
+    // Supprimer l'ancien overlay s'il existe
+    const old = document.getElementById('langGuideOverlay');
+    if (old) old.remove();
+
+    // Chercher le bon conteneur : le modal vidéo
+    const videoModal = document.getElementById('videoModal');
+    if (!videoModal) return;
+    const modalContent = videoModal.querySelector('.modal-content');
+    if (!modalContent) return;
+
+    const overlay = document.createElement('div');
+    overlay.id = 'langGuideOverlay';
+    overlay.className = 'lang-guide-overlay';
+    overlay.innerHTML = `
+        <div class="lang-guide-content">
+            <div class="lang-guide-title">
+                <i class="fas fa-language"></i> Comment passer en Français ?
             </div>
-        `;
-        modalContent.prepend(overlay);
-    }
-    overlay.style.display = 'flex';
+            <div class="lang-guide-steps">
+                <div class="lang-step">
+                    <span class="step-num">1</span>
+                    <span>Cliquez sur un <strong>serveur</strong> dans le player (ex: Vidstream)</span>
+                </div>
+                <div class="lang-step">
+                    <span class="step-num">2</span>
+                    <span>Cliquez sur l'icône <strong>🌐 (globe)</strong> en bas du player</span>
+                </div>
+                <div class="lang-step">
+                    <span class="step-num">3</span>
+                    <span>Sélectionnez <strong>\"French\"</strong> ou <strong>\"Français\"</strong></span>
+                </div>
+            </div>
+            <button class="lang-guide-close" onclick="hideLangGuideOverlay()">
+                <i class="fas fa-check"></i> J'ai compris
+            </button>
+        </div>
+    `;
+    modalContent.prepend(overlay);
 }
 
 function hideLangGuideOverlay() {
