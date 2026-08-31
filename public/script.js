@@ -1,74 +1,55 @@
 // ===== StreamZone JavaScript =====
 let currentLang = localStorage.getItem('streamzone_lang') || 'fr';
+let currentServer = 'default';
 
-// Générer l'URL vidsrc.me
+// Serveurs disponibles pour VidSrc
+const SERVERS = [
+    { id: 'default', name: '🔵 Serveur 1', url: (type, id, s, e) => `https://vidsrc.me/embed/${type}?tmdb=${id}${s ? '&season='+s : ''}${e ? '&episode='+e : ''}` },
+    { id: 'vidstream', name: '🟢 Vidstream', url: (type, id, s, e) => `https://vidsrc.me/embed/${type}?tmdb=${id}&server=vidstream${s ? '&season='+s : ''}${e ? '&episode='+e : ''}` },
+    { id: 'streamtape', name: '🟡 Streamtape', url: (type, id, s, e) => `https://vidsrc.me/embed/${type}?tmdb=${id}&server=streamtape${s ? '&season='+s : ''}${e ? '&episode='+e : ''}` },
+    { id: 'multiembed', name: '🟠 MultiEmbed', url: (type, id, s, e) => `https://multiembed.mov/?video_id=${id}&tmdb=1${s ? '&s='+s : ''}${e ? '&e='+e : ''}` },
+];
+
+// Générer l'URL du serveur actuel
 function vidsrcUrl(type, tmdbId, season, episode) {
-    let url = `https://vidsrc.me/embed/${type}?tmdb=${tmdbId}`;
-    if (season) url += `&season=${season}`;
-    if (episode) url += `&episode=${episode}`;
-    return url;
+    const server = SERVERS.find(s => s.id === currentServer) || SERVERS[0];
+    return server.url(type, tmdbId, season, episode);
 }
 
-// Changer la langue du lecteur
+// Changer de serveur
+function changeServer(serverId) {
+    currentServer = serverId;
+    document.querySelectorAll('.server-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.server === serverId);
+    });
+    // Recharger le player avec le nouveau serveur
+    reloadCurrentPlayer();
+}
+
+// Recharger le player actuel
+function reloadCurrentPlayer() {
+    const iframe = document.querySelector('.player-wrapper iframe');
+    if (!iframe) return;
+    const src = iframe.src;
+    // Extraire tmdb ID, season, episode depuis l'URL actuelle
+    const tmdbMatch = src.match(/tmdb=(\d+)/);
+    const seasonMatch = src.match(/season=(\d+)/);
+    const episodeMatch = src.match(/episode=(\d+)/);
+    if (tmdbMatch) {
+        const type = src.includes('/tv?') ? 'tv' : 'movie';
+        const newUrl = vidsrcUrl(type, tmdbMatch[1], seasonMatch?.[1], episodeMatch?.[1]);
+        iframe.src = newUrl;
+    }
+}
+
+// Changer la langue ( VF / VO ) - restart player pour appliquer
 function changeLanguage(lang) {
     currentLang = lang;
     localStorage.setItem('streamzone_lang', lang);
     document.querySelectorAll('.lang-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.lang === lang);
     });
-    // Afficher l'overlay guide
-    if (lang === 'fr') {
-        showLangGuideOverlay();
-    } else {
-        hideLangGuideOverlay();
-    }
-}
-
-// Overlay guide pour le VF
-function showLangGuideOverlay() {
-    // Supprimer l'ancien overlay s'il existe
-    const old = document.getElementById('langGuideOverlay');
-    if (old) old.remove();
-
-    // Chercher le bon conteneur : le modal vidéo
-    const videoModal = document.getElementById('videoModal');
-    if (!videoModal) return;
-    const modalContent = videoModal.querySelector('.modal-content');
-    if (!modalContent) return;
-
-    const overlay = document.createElement('div');
-    overlay.id = 'langGuideOverlay';
-    overlay.className = 'lang-guide-overlay';
-    overlay.innerHTML = `
-        <div class="lang-guide-content">
-            <div class="lang-guide-title">
-                <i class="fas fa-language"></i> Comment passer en Français ?
-            </div>
-            <div class="lang-guide-steps">
-                <div class="lang-step">
-                    <span class="step-num">1</span>
-                    <span>Cliquez sur un <strong>serveur</strong> dans le player (ex: Vidstream)</span>
-                </div>
-                <div class="lang-step">
-                    <span class="step-num">2</span>
-                    <span>Cliquez sur l'icône <strong>🌐 (globe)</strong> en bas du player</span>
-                </div>
-                <div class="lang-step">
-                    <span class="step-num">3</span>
-                    <span>Sélectionnez <strong>\"French\"</strong> ou <strong>\"Français\"</strong></span>
-                </div>
-            </div>
-            <button class="lang-guide-close" onclick="hideLangGuideOverlay()">
-                <i class="fas fa-check"></i> J'ai compris
-            </button>
-        </div>
-    `;
-    modalContent.prepend(overlay);
-}
-
-function hideLangGuideOverlay() {
-    const overlay = document.getElementById('langGuideOverlay');
-    if (overlay) overlay.style.display = 'none';
+    reloadCurrentPlayer();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -405,10 +386,6 @@ async function showContentModal(type, id) {
 
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
-        // Auto-afficher le guide VF si sélectionné
-        if (currentLang === 'fr') {
-            setTimeout(() => showLangGuideOverlay(), 500);
-        }
 
     } catch (error) {
         console.error('Erreur chargement détails:', error);
@@ -508,10 +485,6 @@ async function showAnimeModal(id) {
 
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
-        // Auto-afficher le guide VF si sélectionné
-        if (currentLang === 'fr') {
-            setTimeout(() => showLangGuideOverlay(), 500);
-        }
 
     } catch (error) {
         console.error('Erreur chargement anime:', error);
@@ -521,23 +494,35 @@ async function showAnimeModal(id) {
 
 // ===== Fonctions épisodes =====
 
-// Barre de sélection de langue
+// Barre de contrôle du lecteur (serveurs + langue)
 function createLangSelector() {
     const langs = [
-        { code: 'fr', label: '🇫🇷 VF', title: 'Doublage Français' },
-        { code: 'en', label: '🇬🇧 VO', title: 'Version Originale (Anglais)' },
+        { code: 'fr', label: '🇫🇷 VF' },
+        { code: 'en', label: '🇬🇧 VO' },
     ];
     return `
-        <div class="lang-selector">
-            <span class="lang-label"><i class="fas fa-globe"></i> Langue :</span>
-            ${langs.map(l => `
-                <button class="lang-btn ${currentLang === l.code ? 'active' : ''}" 
-                        data-lang="${l.code}" 
-                        title="${l.title}"
-                        onclick="changeLanguage('${l.code}')">
-                    ${l.label}
-                </button>
-            `).join('')}
+        <div class="player-controls">
+            <div class="control-row">
+                <span class="lang-label"><i class="fas fa-server"></i> Serveur :</span>
+                ${SERVERS.map(s => `
+                    <button class="server-btn ${currentServer === s.id ? 'active' : ''}" 
+                            data-server="${s.id}" 
+                            onclick="changeServer('${s.id}')">
+                        ${s.name}
+                    </button>
+                `).join('')}
+            </div>
+            <div class="control-row">
+                <span class="lang-label"><i class="fas fa-globe"></i> Langue :</span>
+                ${langs.map(l => `
+                    <button class="lang-btn ${currentLang === l.code ? 'active' : ''}" 
+                            data-lang="${l.code}" 
+                            onclick="changeLanguage('${l.code}')">
+                        ${l.label}
+                    </button>
+                `).join('')}
+                <span class="lang-hint"><i class="fas fa-info-circle"></i> Sélectionnez la langue dans le player vidéo</span>
+            </div>
         </div>
     `;
 }
@@ -777,4 +762,5 @@ if (typeof window !== 'undefined') {
     window.closeUserMenu = closeUserMenu;
     window.hideSearchResults = hideSearchResults;
     window.changeLanguage = changeLanguage;
+    window.changeServer = changeServer;
 }
