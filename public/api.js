@@ -1,147 +1,122 @@
 // ===== StreamZone API Client =====
-// Direct client-side API calls - no backend needed!
+// TMDB (movies/series) + Jikan/Kitsu (anime) - Direct browser calls
 
-// ===== Movies & Series (TVmaze - no key needed) =====
+const TMDB_KEY = 'a338bf8def1610e820ab4626aefc8ffa';
+const TMDB_BASE = 'https://api.themoviedb.org/3';
+const TMDB_IMG = 'https://image.tmdb.org/t/p';
+
+// ===== Movies (TMDB) =====
 
 const moviesAPI = {
     async getPopular(page = 1) {
-        const response = await fetch('https://api.tvmaze.com/shows');
-        const allShows = await response.json();
-        const sorted = allShows
-            .filter(s => s.rating?.average > 0)
-            .sort((a, b) => (b.rating?.average || 0) - (a.rating?.average || 0));
-        const movies = sorted.slice((page - 1) * 20, page * 20).map(formatTVMaze);
-        return { results: movies, total_pages: Math.ceil(sorted.length / 20), source: 'tvmaze' };
+        const r = await fetch(`${TMDB_BASE}/movie/popular?api_key=${TMDB_KEY}&language=fr-FR&page=${page}`);
+        const d = await r.json();
+        return { results: (d.results || []).map(formatTMDB), total_pages: d.total_pages, source: 'tmdb' };
     },
 
     async getTrending() {
-        const response = await fetch('https://api.tvmaze.com/shows');
-        const allShows = await response.json();
-        const sorted = allShows
-            .filter(s => s.rating?.average > 0)
-            .sort((a, b) => (b.rating?.average || 0) - (a.rating?.average || 0));
-        return { results: sorted.slice(0, 12).map(formatTVMaze), source: 'tvmaze' };
+        const r = await fetch(`${TMDB_BASE}/trending/movie/week?api_key=${TMDB_KEY}&language=fr-FR`);
+        const d = await r.json();
+        return { results: (d.results || []).map(formatTMDB), source: 'tmdb' };
     },
 
     async getById(id) {
-        const response = await fetch(`https://api.tvmaze.com/shows/${id}`);
-        if (!response.ok) throw new Error('Not found');
-        return formatTVMaze(await response.json());
+        const r = await fetch(`${TMDB_BASE}/movie/${id}?api_key=${TMDB_KEY}&language=fr-FR&append_to_response=videos,similar`);
+        const d = await r.json();
+        d.poster_url = d.poster_path ? `${TMDB_IMG}/w500${d.poster_path}` : null;
+        d.backdrop_url = d.backdrop_path ? `${TMDB_IMG}/original${d.backdrop_path}` : null;
+        if (d.videos?.results) {
+            const trailer = d.videos.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
+            d.trailer_url = trailer ? `https://www.youtube.com/embed/${trailer.key}` : null;
+        }
+        if (d.similar?.results) d.similar.results = d.similar.results.slice(0, 10).map(formatTMDB);
+        return d;
     },
 
     async search(query) {
-        const response = await fetch(`https://api.tvmaze.com/search/shows?q=${encodeURIComponent(query)}`);
-        const data = await response.json();
-        return { results: data.map(item => formatTVMaze(item.show)).slice(0, 20), source: 'tvmaze' };
+        const r = await fetch(`${TMDB_BASE}/search/movie?api_key=${TMDB_KEY}&language=fr-FR&query=${encodeURIComponent(query)}`);
+        const d = await r.json();
+        return { results: (d.results || []).map(formatTMDB), source: 'tmdb' };
     }
 };
+
+// ===== Series (TMDB) =====
 
 const seriesAPI = {
     async getPopular(page = 1) {
-        const response = await fetch('https://api.tvmaze.com/shows');
-        const allShows = await response.json();
-        const sorted = allShows
-            .filter(s => s.rating?.average > 0 && s.type === 'Scripted')
-            .sort((a, b) => (b.rating?.average || 0) - (a.rating?.average || 0));
-        const series = sorted.slice((page - 1) * 20, page * 20).map(formatTVMaze);
-        return { results: series, total_pages: Math.ceil(sorted.length / 20), source: 'tvmaze' };
+        const r = await fetch(`${TMDB_BASE}/tv/popular?api_key=${TMDB_KEY}&language=fr-FR&page=${page}`);
+        const d = await r.json();
+        return { results: (d.results || []).map(formatTMDB), total_pages: d.total_pages, source: 'tmdb' };
     },
 
     async getTrending() {
-        const response = await fetch('https://api.tvmaze.com/shows');
-        const allShows = await response.json();
-        const sorted = allShows
-            .filter(s => s.rating?.average > 0 && s.type === 'Scripted')
-            .sort((a, b) => (b.rating?.average || 0) - (a.rating?.average || 0));
-        return { results: sorted.slice(0, 12).map(formatTVMaze), source: 'tvmaze' };
+        const r = await fetch(`${TMDB_BASE}/trending/tv/week?api_key=${TMDB_KEY}&language=fr-FR`);
+        const d = await r.json();
+        return { results: (d.results || []).map(formatTMDB), source: 'tmdb' };
     },
 
     async getById(id) {
-        const response = await fetch(`https://api.tvmaze.com/shows/${id}`);
-        if (!response.ok) throw new Error('Not found');
-        return formatTVMaze(await response.json());
+        const r = await fetch(`${TMDB_BASE}/tv/${id}?api_key=${TMDB_KEY}&language=fr-FR&append_to_response=videos,similar`);
+        const d = await r.json();
+        d.poster_url = d.poster_path ? `${TMDB_IMG}/w500${d.poster_path}` : null;
+        d.backdrop_url = d.backdrop_path ? `${TMDB_IMG}/original${d.backdrop_path}` : null;
+        if (d.videos?.results) {
+            const trailer = d.videos.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
+            d.trailer_url = trailer ? `https://www.youtube.com/embed/${trailer.key}` : null;
+        }
+        if (d.similar?.results) d.similar.results = d.similar.results.slice(0, 10).map(formatTMDB);
+        return d;
     },
 
     async search(query) {
-        const response = await fetch(`https://api.tvmaze.com/search/shows?q=${encodeURIComponent(query)}`);
-        const data = await response.json();
-        return { results: data.map(item => formatTVMaze(item.show)).slice(0, 20), source: 'tvmaze' };
+        const r = await fetch(`${TMDB_BASE}/search/tv?api_key=${TMDB_KEY}&language=fr-FR&query=${encodeURIComponent(query)}`);
+        const d = await r.json();
+        return { results: (d.results || []).map(formatTMDB), source: 'tmdb' };
     }
 };
 
-// ===== Anime (Jikan - MyAnimeList - no key needed) =====
+// ===== Anime (Jikan + Kitsu fallback) =====
 
 const animeAPI = {
     async getPopular() {
         try {
-            const response = await fetch('https://api.jikan.moe/v4/top/anime?filter=bypopularity&page=1&limit=20');
-            if (response.ok) {
-                const data = await response.json();
-                if (data.data?.length > 0) {
-                    return { results: data.data.map(formatJikan), source: 'jikan' };
-                }
-            }
-        } catch (e) { console.log('Jikan unavailable'); }
-
-        // Kitsu fallback
-        const response = await fetch('https://kitsu.io/api/edge/anime?sort=-averageRating&page[limit]=20', {
-            headers: { 'Accept': 'application/vnd.api+json' }
-        });
-        const data = await response.json();
-        return { results: (data.data || []).map(formatKitsu), source: 'kitsu' };
+            const r = await fetch('https://api.jikan.moe/v4/top/anime?filter=bypopularity&page=1&limit=20');
+            if (r.ok) { const d = await r.json(); if (d.data?.length) return { results: d.data.map(formatJikan), source: 'jikan' }; }
+        } catch (e) {}
+        const r = await fetch('https://kitsu.io/api/edge/anime?sort=-averageRating&page[limit]=20', { headers: { 'Accept': 'application/vnd.api+json' } });
+        const d = await r.json();
+        return { results: (d.data || []).map(formatKitsu), source: 'kitsu' };
     },
 
     async getTrending() {
         try {
-            const response = await fetch('https://api.jikan.moe/v4/top/anime?filter=airing&page=1&limit=20');
-            if (response.ok) {
-                const data = await response.json();
-                if (data.data?.length > 0) {
-                    return { results: data.data.map(formatJikan), source: 'jikan' };
-                }
-            }
-        } catch (e) { console.log('Jikan unavailable'); }
-
-        const response = await fetch('https://kitsu.io/api/edge/anime?sort=-createdAt&page[limit]=20', {
-            headers: { 'Accept': 'application/vnd.api+json' }
-        });
-        const data = await response.json();
-        return { results: (data.data || []).map(formatKitsu), source: 'kitsu' };
+            const r = await fetch('https://api.jikan.moe/v4/top/anime?filter=airing&page=1&limit=20');
+            if (r.ok) { const d = await r.json(); if (d.data?.length) return { results: d.data.map(formatJikan), source: 'jikan' }; }
+        } catch (e) {}
+        const r = await fetch('https://kitsu.io/api/edge/anime?sort=-createdAt&page[limit]=20', { headers: { 'Accept': 'application/vnd.api+json' } });
+        const d = await r.json();
+        return { results: (d.data || []).map(formatKitsu), source: 'kitsu' };
     },
 
     async getById(id) {
         try {
-            const response = await fetch(`https://api.jikan.moe/v4/anime/${id}/full`);
-            if (response.ok) {
-                const data = await response.json();
-                if (data.data) return formatJikan(data.data);
-            }
-        } catch (e) { console.log('Jikan unavailable'); }
-
-        const response = await fetch(`https://kitsu.io/api/edge/anime/${id}`, {
-            headers: { 'Accept': 'application/vnd.api+json' }
-        });
-        const data = await response.json();
-        if (data.data) return formatKitsu(data.data);
+            const r = await fetch(`https://api.jikan.moe/v4/anime/${id}/full`);
+            if (r.ok) { const d = await r.json(); if (d.data) return formatJikan(d.data); }
+        } catch (e) {}
+        const r = await fetch(`https://kitsu.io/api/edge/anime/${id}`, { headers: { 'Accept': 'application/vnd.api+json' } });
+        const d = await r.json();
+        if (d.data) return formatKitsu(d.data);
         throw new Error('Not found');
     },
 
     async search(query) {
         try {
-            const response = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&limit=20`);
-            if (response.ok) {
-                const data = await response.json();
-                if (data.data?.length > 0) {
-                    return { results: data.data.map(formatJikan), source: 'jikan' };
-                }
-            }
-        } catch (e) { console.log('Jikan unavailable'); }
-
-        const response = await fetch(`https://kitsu.io/api/edge/anime?filter[text]=${encodeURIComponent(query)}&page[limit]=20`, {
-            headers: { 'Accept': 'application/vnd.api+json' }
-        });
-        const data = await response.json();
-        return { results: (data.data || []).map(formatKitsu), source: 'kitsu' };
+            const r = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&limit=20`);
+            if (r.ok) { const d = await r.json(); if (d.data?.length) return { results: d.data.map(formatJikan), source: 'jikan' }; }
+        } catch (e) {}
+        const r = await fetch(`https://kitsu.io/api/edge/anime?filter[text]=${encodeURIComponent(query)}&page[limit]=20`, { headers: { 'Accept': 'application/vnd.api+json' } });
+        const d = await r.json();
+        return { results: (d.data || []).map(formatKitsu), source: 'kitsu' };
     }
 };
 
@@ -149,26 +124,21 @@ const animeAPI = {
 
 const searchAPI = {
     async searchAll(query) {
-        const results = { movies: [], anime: [], series: [] };
-
+        const results = { movies: [], series: [], anime: [] };
         try {
-            const tvmaze = await fetch(`https://api.tvmaze.com/search/shows?q=${encodeURIComponent(query)}`);
-            const tvmazeData = await tvmaze.json();
-            tvmazeData.forEach(item => {
-                const formatted = formatTVMaze(item.show);
-                if (item.show.type === 'Scripted') results.series.push(formatted);
-                else results.movies.push(formatted);
-            });
-        } catch (e) { console.log('TVmaze search error'); }
-
+            const [moviesR, seriesR] = await Promise.all([
+                fetch(`${TMDB_BASE}/search/movie?api_key=${TMDB_KEY}&language=fr-FR&query=${encodeURIComponent(query)}`),
+                fetch(`${TMDB_BASE}/search/tv?api_key=${TMDB_KEY}&language=fr-FR&query=${encodeURIComponent(query)}`)
+            ]);
+            const moviesD = await moviesR.json();
+            const seriesD = await seriesR.json();
+            results.movies = (moviesD.results || []).slice(0, 10).map(formatTMDB);
+            results.series = (seriesD.results || []).slice(0, 10).map(formatTMDB);
+        } catch (e) {}
         try {
-            const jikan = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&limit=10`);
-            if (jikan.ok) {
-                const jikanData = await jikan.json();
-                results.anime = (jikanData.data || []).map(formatJikan);
-            }
-        } catch (e) { console.log('Jikan search error'); }
-
+            const r = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&limit=10`);
+            if (r.ok) { const d = await r.json(); results.anime = (d.data || []).map(formatJikan); }
+        } catch (e) {}
         return results;
     }
 };
@@ -177,24 +147,19 @@ const searchAPI = {
 
 const favoritesAPI = {
     add(contentId, contentType, title, posterUrl) {
-        const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-        if (favorites.find(f => f.content_id === String(contentId) && f.content_type === contentType)) return false;
-        favorites.push({ content_id: String(contentId), content_type: contentType, title, poster_url: posterUrl, created_at: new Date().toISOString() });
-        localStorage.setItem('favorites', JSON.stringify(favorites));
+        const fav = JSON.parse(localStorage.getItem('favorites') || '[]');
+        if (fav.find(f => f.content_id === String(contentId) && f.content_type === contentType)) return false;
+        fav.push({ content_id: String(contentId), content_type: contentType, title, poster_url: posterUrl, created_at: new Date().toISOString() });
+        localStorage.setItem('favorites', JSON.stringify(fav));
         return true;
     },
-    getAll() {
-        return JSON.parse(localStorage.getItem('favorites') || '[]');
-    },
+    getAll() { return JSON.parse(localStorage.getItem('favorites') || '[]'); },
     remove(contentId, contentType) {
-        const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-        localStorage.setItem('favorites', JSON.stringify(
-            favorites.filter(f => !(f.content_id === String(contentId) && f.content_type === contentType))
-        ));
+        const fav = JSON.parse(localStorage.getItem('favorites') || '[]');
+        localStorage.setItem('favorites', JSON.stringify(fav.filter(f => !(f.content_id === String(contentId) && f.content_type === contentType))));
     },
     isFavorite(contentId, contentType) {
-        return JSON.parse(localStorage.getItem('favorites') || '[]')
-            .some(f => f.content_id === String(contentId) && f.content_type === contentType);
+        return JSON.parse(localStorage.getItem('favorites') || '[]').some(f => f.content_id === String(contentId) && f.content_type === contentType);
     }
 };
 
@@ -202,37 +167,32 @@ const favoritesAPI = {
 
 const historyAPI = {
     add(contentId, contentType, title, posterUrl) {
-        let history = JSON.parse(localStorage.getItem('history') || '[]');
-        history = history.filter(h => !(h.content_id === String(contentId) && h.content_type === contentType));
-        history.unshift({ content_id: String(contentId), content_type: contentType, title, poster_url: posterUrl, watched_at: new Date().toISOString() });
-        localStorage.setItem('history', JSON.stringify(history.slice(0, 50)));
+        let h = JSON.parse(localStorage.getItem('history') || '[]');
+        h = h.filter(i => !(i.content_id === String(contentId) && i.content_type === contentType));
+        h.unshift({ content_id: String(contentId), content_type: contentType, title, poster_url: posterUrl, watched_at: new Date().toISOString() });
+        localStorage.setItem('history', JSON.stringify(h.slice(0, 50)));
     },
-    getAll() {
-        return JSON.parse(localStorage.getItem('history') || '[]');
-    }
+    getAll() { return JSON.parse(localStorage.getItem('history') || '[]'); }
 };
 
 // ===== Formatters =====
 
-function formatTVMaze(show) {
-    const img = show.image?.original || show.image?.medium || `https://via.placeholder.com/500x750?text=${encodeURIComponent(show.name)}`;
+function formatTMDB(item) {
+    const name = item.title || item.name || 'Untitled';
     return {
-        id: show.id,
-        title: show.name,
-        name: show.name,
-        overview: show.summary?.replace(/<[^>]*>/g, '') || 'Pas de description disponible',
-        poster_url: img,
-        backdrop_url: show.image?.original || null,
-        vote_average: show.rating?.average || 0,
-        release_date: show.premiered || 'N/A',
-        first_air_date: show.premiered || 'N/A',
-        genres: show.genres || [],
-        genre_ids: [],
-        status: show.status || 'Running',
-        language: show.language || 'English',
-        network: show.network?.name || show.webChannel?.name || 'N/A',
-        trailer_url: show.officialSite || show.url || null,
-        source: 'tvmaze'
+        id: item.id,
+        title: name,
+        name: name,
+        overview: item.overview || 'Pas de description disponible',
+        poster_url: item.poster_path ? `${TMDB_IMG}/w500${item.poster_path}` : `https://via.placeholder.com/500x750?text=${encodeURIComponent(name)}`,
+        backdrop_url: item.backdrop_path ? `${TMDB_IMG}/original${item.backdrop_path}` : null,
+        vote_average: item.vote_average || 0,
+        release_date: item.release_date || item.first_air_date || 'N/A',
+        first_air_date: item.first_air_date || 'N/A',
+        genres: item.genres?.map(g => g.name) || [],
+        genre_ids: item.genre_ids || [],
+        status: item.status || 'N/A',
+        source: 'tmdb'
     };
 }
 
@@ -248,8 +208,6 @@ function formatJikan(anime) {
         vote_average: anime.score || 0,
         release_date: anime.aired?.from?.split('T')[0] || anime.year || 'N/A',
         genres: anime.genres?.map(g => g.name) || [],
-        genre_ids: anime.genres?.map(g => g.mal_id) || [],
-        status: anime.status || 'N/A',
         episodeCount: anime.episodes || 0,
         episodeLength: anime.duration || 0,
         rating: anime.rating || 'N/A',
@@ -271,10 +229,7 @@ function formatKitsu(item) {
         release_date: item.attributes.startDate || 'N/A',
         status: item.attributes.status,
         episodeCount: item.attributes.episodeCount,
-        episodeLength: item.attributes.episodeLength,
-        ageRating: item.attributes.ageRating,
         poster_url: item.attributes.posterImage?.original || item.attributes.posterImage?.large,
-        cover_url: item.attributes.coverImage?.original,
         trailer_url: item.attributes.youtubeVideoId ? `https://www.youtube.com/watch?v=${item.attributes.youtubeVideoId}` : null,
         source: 'kitsu'
     };
