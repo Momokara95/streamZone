@@ -1,16 +1,11 @@
 // ===== StreamZone API Client =====
-// TMDB (movies/series) + Jikan/Kitsu (anime)
+// TMDB via Netlify Edge Function proxy + Jikan/Kitsu direct
 
-const TMDB_KEY = 'a338bf8def1610e820ab4626aefc8ffa';
-const TMDB_BASE = 'https://api.themoviedb.org/3';
 const TMDB_IMG = 'https://image.tmdb.org/t/p';
 
-// CORS proxy for TMDB (browser blocks direct calls)
-const PROXY = 'https://corsproxy.io/?url=';
-
+// Use Netlify Edge Function as proxy (same domain, no CORS issues)
 async function tmdbFetch(endpoint) {
-    const url = `${TMDB_BASE}${endpoint}`;
-    const r = await fetch(`${PROXY}${encodeURIComponent(url)}`);
+    const r = await fetch(`/api/tmdb${endpoint}`);
     return r.json();
 }
 
@@ -18,17 +13,17 @@ async function tmdbFetch(endpoint) {
 
 const moviesAPI = {
     async getPopular(page = 1) {
-        const d = await tmdbFetch(`/movie/popular?api_key=${TMDB_KEY}&language=fr-FR&page=${page}`);
+        const d = await tmdbFetch(`/movie/popular?language=fr-FR&page=${page}`);
         return { results: (d.results || []).map(formatTMDB), total_pages: d.total_pages, source: 'tmdb' };
     },
 
     async getTrending() {
-        const d = await tmdbFetch(`/trending/movie/week?api_key=${TMDB_KEY}&language=fr-FR`);
+        const d = await tmdbFetch(`/trending/movie/week?language=fr-FR`);
         return { results: (d.results || []).map(formatTMDB), source: 'tmdb' };
     },
 
     async getById(id) {
-        const d = await tmdbFetch(`/movie/${id}?api_key=${TMDB_KEY}&language=fr-FR&append_to_response=videos,similar`);
+        const d = await tmdbFetch(`/movie/${id}?language=fr-FR&append_to_response=videos,similar`);
         d.poster_url = d.poster_path ? `${TMDB_IMG}/w500${d.poster_path}` : null;
         d.backdrop_url = d.backdrop_path ? `${TMDB_IMG}/original${d.backdrop_path}` : null;
         if (d.videos?.results) {
@@ -40,7 +35,7 @@ const moviesAPI = {
     },
 
     async search(query) {
-        const d = await tmdbFetch(`/search/movie?api_key=${TMDB_KEY}&language=fr-FR&query=${encodeURIComponent(query)}`);
+        const d = await tmdbFetch(`/search/movie?language=fr-FR&query=${encodeURIComponent(query)}`);
         return { results: (d.results || []).map(formatTMDB), source: 'tmdb' };
     }
 };
@@ -49,17 +44,17 @@ const moviesAPI = {
 
 const seriesAPI = {
     async getPopular(page = 1) {
-        const d = await tmdbFetch(`/tv/popular?api_key=${TMDB_KEY}&language=fr-FR&page=${page}`);
+        const d = await tmdbFetch(`/tv/popular?language=fr-FR&page=${page}`);
         return { results: (d.results || []).map(formatTMDB), total_pages: d.total_pages, source: 'tmdb' };
     },
 
     async getTrending() {
-        const d = await tmdbFetch(`/trending/tv/week?api_key=${TMDB_KEY}&language=fr-FR`);
+        const d = await tmdbFetch(`/trending/tv/week?language=fr-FR`);
         return { results: (d.results || []).map(formatTMDB), source: 'tmdb' };
     },
 
     async getById(id) {
-        const d = await tmdbFetch(`/tv/${id}?api_key=${TMDB_KEY}&language=fr-FR&append_to_response=videos,similar`);
+        const d = await tmdbFetch(`/tv/${id}?language=fr-FR&append_to_response=videos,similar`);
         d.poster_url = d.poster_path ? `${TMDB_IMG}/w500${d.poster_path}` : null;
         d.backdrop_url = d.backdrop_path ? `${TMDB_IMG}/original${d.backdrop_path}` : null;
         if (d.videos?.results) {
@@ -71,7 +66,7 @@ const seriesAPI = {
     },
 
     async search(query) {
-        const d = await tmdbFetch(`/search/tv?api_key=${TMDB_KEY}&language=fr-FR&query=${encodeURIComponent(query)}`);
+        const d = await tmdbFetch(`/search/tv?language=fr-FR&query=${encodeURIComponent(query)}`);
         return { results: (d.results || []).map(formatTMDB), source: 'tmdb' };
     }
 };
@@ -128,8 +123,8 @@ const searchAPI = {
         const results = { movies: [], series: [], anime: [] };
         try {
             const [moviesD, seriesD] = await Promise.all([
-                tmdbFetch(`/search/movie?api_key=${TMDB_KEY}&language=fr-FR&query=${encodeURIComponent(query)}`),
-                tmdbFetch(`/search/tv?api_key=${TMDB_KEY}&language=fr-FR&query=${encodeURIComponent(query)}`)
+                tmdbFetch(`/search/movie?language=fr-FR&query=${encodeURIComponent(query)}`),
+                tmdbFetch(`/search/tv?language=fr-FR&query=${encodeURIComponent(query)}`)
             ]);
             results.movies = (moviesD.results || []).slice(0, 10).map(formatTMDB);
             results.series = (seriesD.results || []).slice(0, 10).map(formatTMDB);
