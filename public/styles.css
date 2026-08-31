@@ -1360,6 +1360,30 @@ ul {
     font-weight: 600;
 }
 
+.lang-guide {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1rem;
+    background: rgba(229, 9, 20, 0.15);
+    border: 1px solid rgba(229, 9, 20, 0.3);
+    border-radius: 10px;
+    margin-bottom: 0.8rem;
+    font-size: 0.85rem;
+    color: #f0a0a0;
+    line-height: 1.4;
+}
+
+.lang-guide i {
+    color: var(--primary);
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.lang-guide strong {
+    color: white;
+}
+
 @media (max-width: 768px) {
     .video-container iframe,
     .player-wrapper iframe {

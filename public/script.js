@@ -1,16 +1,11 @@
 // ===== StreamZone JavaScript =====
-// Langue courante (VF par défaut)
 let currentLang = localStorage.getItem('streamzone_lang') || 'fr';
 
-// Générer l'URL vidsrc.me avec langue
+// Générer l'URL vidsrc.me
 function vidsrcUrl(type, tmdbId, season, episode) {
     let url = `https://vidsrc.me/embed/${type}?tmdb=${tmdbId}`;
     if (season) url += `&season=${season}`;
     if (episode) url += `&episode=${episode}`;
-    // Langue : fr = VF, en = VO, etc.
-    if (currentLang && currentLang !== 'en') {
-        url += `&lang=${currentLang}`;
-    }
     return url;
 }
 
@@ -18,19 +13,20 @@ function vidsrcUrl(type, tmdbId, season, episode) {
 function changeLanguage(lang) {
     currentLang = lang;
     localStorage.setItem('streamzone_lang', lang);
-    // Mettre à jour les boutons
     document.querySelectorAll('.lang-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.lang === lang);
     });
-    // Recharger le lecteur vidéo
-    const iframe = document.querySelector('.player-wrapper iframe, .video-container iframe');
-    if (iframe && iframe.src.includes('vidsrc.me')) {
-        const newSrc = iframe.src.replace(/&lang=[a-z]+/, '').replace(/\?lang=[a-z]+/, '');
-        if (lang !== 'en') {
-            iframe.src = newSrc + (newSrc.includes('?') ? '&' : '?') + `lang=${lang}`;
+    // Afficher le guide pour changer dans le player
+    const guide = document.getElementById('langGuide');
+    if (guide) {
+        if (lang === 'fr') {
+            guide.innerHTML = `<i class="fas fa-info-circle"></i> Pour le <strong>doublage français</strong>, cliquez sur le sélecteur de langue 🌐 dans le player vidéo et choisissez <strong>\"Français\"</strong>.`;
+        } else if (lang === 'en') {
+            guide.innerHTML = `<i class="fas fa-info-circle"></i> Pour l'<strong>audio original (anglais)</strong>, sélectionnez <strong>\"English\"</strong> dans le player.`;
         } else {
-            iframe.src = newSrc;
+            guide.innerHTML = `<i class="fas fa-info-circle"></i> Sélectionnez la langue dans le player vidéo. `;
         }
+        guide.style.display = 'flex';
     }
 }
 
@@ -479,13 +475,12 @@ async function showAnimeModal(id) {
 // Barre de sélection de langue
 function createLangSelector() {
     const langs = [
-        { code: 'fr', label: '🇫🇷 VF', title: 'Version Française' },
+        { code: 'fr', label: '🇫🇷 VF', title: 'Doublage Français' },
         { code: 'en', label: '🇬🇧 VO', title: 'Version Originale (Anglais)' },
-        { code: 'es', label: '🇪🇸 ES', title: 'Espagnol' },
-        { code: 'de', label: '🇩🇪 DE', title: 'Allemand' },
-        { code: 'ja', label: '🇯🇵 JA', title: 'Japonais' },
-        { code: 'pt', label: '🇧🇷 PT', title: 'Portugais' },
     ];
+    const defaultGuide = currentLang === 'fr'
+        ? `<i class="fas fa-info-circle"></i> Pour le <strong>doublage français</strong>, cliquez sur le sélecteur de langue 🌐 dans le player vidéo et choisissez <strong>\"Français\"</strong>.`
+        : `<i class="fas fa-info-circle"></i> Sélectionnez la langue dans le player vidéo.`;
     return `
         <div class="lang-selector">
             <span class="lang-label"><i class="fas fa-globe"></i> Langue :</span>
@@ -497,6 +492,9 @@ function createLangSelector() {
                     ${l.label}
                 </button>
             `).join('')}
+        </div>
+        <div class="lang-guide" id="langGuide">
+            ${defaultGuide}
         </div>
     `;
 }
