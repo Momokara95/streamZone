@@ -590,6 +590,7 @@ ul {
     position: relative;
     max-height: 90vh;
     overflow-y: auto;
+    z-index: 2001;
 }
 
 .modal-close {
@@ -1386,18 +1387,18 @@ ul {
 
 /* ===== Language Guide Overlay ===== */
 .lang-guide-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.85);
+    position: relative;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.9);
     display: none;
     align-items: center;
     justify-content: center;
-    z-index: 100;
+    z-index: 3000;
     border-radius: 10px;
+    margin-bottom: 1rem;
+    padding: 2rem;
     animation: fadeIn 0.3s ease;
+    border: 2px solid var(--primary);
 }
 
 .lang-guide-overlay.visible {

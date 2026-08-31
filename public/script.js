@@ -24,11 +24,13 @@ function changeLanguage(lang) {
     }
 }
 
-// Overlay guide pour le VF
+// Overlay guide pour le VF - placé dans le MODAL (au-dessus de tout)
 function showLangGuideOverlay() {
     let overlay = document.getElementById('langGuideOverlay');
     if (!overlay) {
-        const container = document.querySelector('.video-container');
+        // Chercher le conteneur du modal (pas la video-container, car l'iframe cache tout)
+        const modalContent = document.querySelector('.modal-content');
+        if (!modalContent) return;
         overlay = document.createElement('div');
         overlay.id = 'langGuideOverlay';
         overlay.className = 'lang-guide-overlay';
@@ -40,7 +42,7 @@ function showLangGuideOverlay() {
                 <div class="lang-guide-steps">
                     <div class="lang-step">
                         <span class="step-num">1</span>
-                        <span>Cliquez sur <strong>"Vidstream"</strong> ou un autre serveur dans le player</span>
+                        <span>Cliquez sur un <strong>serveur</strong> dans le player (ex: Vidstream)</span>
                     </div>
                     <div class="lang-step">
                         <span class="step-num">2</span>
@@ -48,7 +50,7 @@ function showLangGuideOverlay() {
                     </div>
                     <div class="lang-step">
                         <span class="step-num">3</span>
-                        <span>Sélectionnez <strong>"French"</strong> ou <strong>"Français"</strong></span>
+                        <span>Sélectionnez <strong>\"French\"</strong> ou <strong>\"Français\"</strong></span>
                     </div>
                 </div>
                 <button class="lang-guide-close" onclick="hideLangGuideOverlay()">
@@ -56,17 +58,14 @@ function showLangGuideOverlay() {
                 </button>
             </div>
         `;
-        if (container) {
-            container.style.position = 'relative';
-            container.appendChild(overlay);
-        }
+        modalContent.prepend(overlay);
     }
-    overlay.classList.add('visible');
+    overlay.style.display = 'flex';
 }
 
 function hideLangGuideOverlay() {
     const overlay = document.getElementById('langGuideOverlay');
-    if (overlay) overlay.classList.remove('visible');
+    if (overlay) overlay.style.display = 'none';
 }
 
 document.addEventListener('DOMContentLoaded', () => {
