@@ -1,4 +1,38 @@
 // ===== StreamZone JavaScript =====
+// Langue courante (VF par défaut)
+let currentLang = localStorage.getItem('streamzone_lang') || 'fr';
+
+// Générer l'URL vidsrc.me avec langue
+function vidsrcUrl(type, tmdbId, season, episode) {
+    let url = `https://vidsrc.me/embed/${type}?tmdb=${tmdbId}`;
+    if (season) url += `&season=${season}`;
+    if (episode) url += `&episode=${episode}`;
+    // Langue : fr = VF, en = VO, etc.
+    if (currentLang && currentLang !== 'en') {
+        url += `&lang=${currentLang}`;
+    }
+    return url;
+}
+
+// Changer la langue du lecteur
+function changeLanguage(lang) {
+    currentLang = lang;
+    localStorage.setItem('streamzone_lang', lang);
+    // Mettre à jour les boutons
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lang === lang);
+    });
+    // Recharger le lecteur vidéo
+    const iframe = document.querySelector('.player-wrapper iframe, .video-container iframe');
+    if (iframe && iframe.src.includes('vidsrc.me')) {
+        const newSrc = iframe.src.replace(/&lang=[a-z]+/, '').replace(/\?lang=[a-z]+/, '');
+        if (lang !== 'en') {
+            iframe.src = newSrc + (newSrc.includes('?') ? '&' : '?') + `lang=${lang}`;
+        } else {
+            iframe.src = newSrc;
+        }
+    }
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     // Initialiser les sliders
@@ -267,16 +301,20 @@ async function showContentModal(type, id) {
         durationEl.innerHTML = `<i class="fas fa-clock"></i> ${type === 'movie' ? `${data.runtime || '?'} min` : `${data.number_of_seasons || '?'} saisons`}`;
 
         // LECTEUR VIDÉO COMPLÈT via vidsrc.me
+        const langBar = createLangSelector();
         if (type === 'movie') {
             // Film complet : embed direct
             videoContainer.innerHTML = `
-                <iframe 
-                    src="https://vidsrc.me/embed/movie?tmdb=${id}" 
-                    frameborder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                    allowfullscreen
-                    style="width: 100%; height: 600px; border-radius: 10px;">
-                </iframe>
+                ${langBar}
+                <div class="player-wrapper" id="playerWrapper">
+                    <iframe 
+                        src="${vidsrcUrl('movie', id)}" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen
+                        style="width: 100%; height: 600px; border-radius: 10px;">
+                    </iframe>
+                </div>
             `;
         } else {
             // Série : sélectionneur d'épisodes + lecteur
@@ -303,9 +341,10 @@ async function showContentModal(type, id) {
                         ${episodesHTML}
                     </div>
                 </div>
+                ${langBar}
                 <div class="player-wrapper" id="playerWrapper">
                     <iframe 
-                        src="https://vidsrc.me/embed/tv?tmdb=${id}&season=1&episode=1" 
+                        src="${vidsrcUrl('tv', id, 1, 1)}" 
                         frameborder="0" 
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                         allowfullscreen
@@ -370,6 +409,7 @@ async function showAnimeModal(id) {
             // Anime trouvé sur TMDB : lecteur complet avec épisodes
             const episodeCount = data.episodeCount || 24;
             let episodesHTML = createAnimeEpisodeSelector(tmdbId, episodeCount);
+            const langBar = createLangSelector();
             
             videoContainer.innerHTML = `
                 <div class="episode-selector">
@@ -378,9 +418,10 @@ async function showAnimeModal(id) {
                         ${episodesHTML}
                     </div>
                 </div>
+                ${langBar}
                 <div class="player-wrapper" id="playerWrapper">
                     <iframe 
-                        src="https://vidsrc.me/embed/tv?tmdb=${tmdbId}&season=1&episode=1" 
+                        src="${vidsrcUrl('tv', tmdbId, 1, 1)}" 
                         frameborder="0" 
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                         allowfullscreen
@@ -435,6 +476,31 @@ async function showAnimeModal(id) {
 
 // ===== Fonctions épisodes =====
 
+// Barre de sélection de langue
+function createLangSelector() {
+    const langs = [
+        { code: 'fr', label: '🇫🇷 VF', title: 'Version Française' },
+        { code: 'en', label: '🇬🇧 VO', title: 'Version Originale (Anglais)' },
+        { code: 'es', label: '🇪🇸 ES', title: 'Espagnol' },
+        { code: 'de', label: '🇩🇪 DE', title: 'Allemand' },
+        { code: 'ja', label: '🇯🇵 JA', title: 'Japonais' },
+        { code: 'pt', label: '🇧🇷 PT', title: 'Portugais' },
+    ];
+    return `
+        <div class="lang-selector">
+            <span class="lang-label"><i class="fas fa-globe"></i> Langue :</span>
+            ${langs.map(l => `
+                <button class="lang-btn ${currentLang === l.code ? 'active' : ''}" 
+                        data-lang="${l.code}" 
+                        title="${l.title}"
+                        onclick="changeLanguage('${l.code}')">
+                    ${l.label}
+                </button>
+            `).join('')}
+        </div>
+    `;
+}
+
 function createEpisodeSelector(seriesId, seasons, currentSeason, episodeCount) {
     let html = '';
     for (let ep = 1; ep <= episodeCount; ep++) {
@@ -470,7 +536,7 @@ function playEpisode(seriesId, season, episode, btnEl) {
     const wrapper = document.getElementById('playerWrapper') || document.querySelector('.video-container');
     wrapper.innerHTML = `
         <iframe 
-            src="https://vidsrc.me/embed/tv?tmdb=${seriesId}&season=${season}&episode=${episode}" 
+            src="${vidsrcUrl('tv', seriesId, season, episode)}" 
             frameborder="0" 
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
             allowfullscreen
@@ -669,4 +735,5 @@ if (typeof window !== 'undefined') {
     window.showUserMenu = showUserMenu;
     window.closeUserMenu = closeUserMenu;
     window.hideSearchResults = hideSearchResults;
+    window.changeLanguage = changeLanguage;
 }
