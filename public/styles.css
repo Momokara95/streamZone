@@ -1368,25 +1368,32 @@ ul {
     font-weight: 600;
 }
 
-.lang-hint-row {
+/* ===== Language Notice ===== */
+.lang-notice {
     background: rgba(229, 9, 20, 0.1);
-    border-radius: 8px;
-    padding: 0.5rem 0.8rem;
-    margin-top: 0.2rem;
+    border: 1px solid rgba(229, 9, 20, 0.3);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 0.8rem;
 }
 
-.lang-hint {
-    color: #ccc;
-    font-size: 0.8rem;
-    line-height: 1.4;
-}
-
-.lang-hint i {
+.lang-notice-title {
     color: var(--primary);
-    margin-right: 0.3rem;
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
 }
 
-.lang-hint strong {
+.lang-notice-body {
+    color: #ccc;
+    font-size: 0.85rem;
+    line-height: 1.6;
+}
+
+.lang-notice-body strong {
     color: white;
 }
 

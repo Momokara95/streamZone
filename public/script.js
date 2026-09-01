@@ -485,22 +485,15 @@ async function showAnimeModal(id) {
 
 // ===== Fonctions épisodes =====
 
-// Barre de contrôle du lecteur (serveurs + instruction langue)
+// Bandeau d'instruction pour changer la langue
 function createLangSelector() {
     return `
-        <div class="player-controls">
-            <div class="control-row">
-                <span class="lang-label"><i class="fas fa-server"></i> Serveur :</span>
-                ${SERVERS.map(s => `
-                    <button class="server-btn ${currentServer === s.id ? 'active' : ''}" 
-                            data-server="${s.id}" 
-                            onclick="changeServer('${s.id}')">
-                        ${s.name}
-                    </button>
-                `).join('')}
-            </div>
-            <div class="control-row lang-hint-row">
-                <span class="lang-hint"><i class="fas fa-globe"></i> Pour le <strong>VF (Français)</strong> : dans le player, cliquez sur <strong>🔊 Audio</strong> ou <strong>🌐</strong> puis choisissez <strong>French</strong></span>
+        <div class="lang-notice">
+            <div class="lang-notice-title"><i class="fas fa-info-circle"></i> Comment passer en Français ?</div>
+            <div class="lang-notice-body">
+                Le player utilise un <strong>lecteur intégré</strong>. Pour changer la langue :<br>
+                ▶ Cliquez sur <strong>🔊 Audio</strong> ou <strong>🌐</strong> dans la barre du player → choisissez <strong>French</strong><br>
+                ▶ Ou cliquez sur <strong>⚙️ Settings</strong> → <strong>Audio Track</strong> → <strong>French</strong>
             </div>
         </div>
     `;
