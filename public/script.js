@@ -1,5 +1,4 @@
 // ===== StreamZone JavaScript =====
-let currentLang = localStorage.getItem('streamzone_lang') || 'fr';
 let currentServer = 'default';
 
 // Serveurs disponibles pour VidSrc
@@ -42,15 +41,7 @@ function reloadCurrentPlayer() {
     }
 }
 
-// Changer la langue ( VF / VO ) - restart player pour appliquer
-function changeLanguage(lang) {
-    currentLang = lang;
-    localStorage.setItem('streamzone_lang', lang);
-    document.querySelectorAll('.lang-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.lang === lang);
-    });
-    reloadCurrentPlayer();
-}
+
 
 document.addEventListener('DOMContentLoaded', () => {
     // Initialiser les sliders
@@ -494,12 +485,8 @@ async function showAnimeModal(id) {
 
 // ===== Fonctions épisodes =====
 
-// Barre de contrôle du lecteur (serveurs + langue)
+// Barre de contrôle du lecteur (serveurs + instruction langue)
 function createLangSelector() {
-    const langs = [
-        { code: 'fr', label: '🇫🇷 VF' },
-        { code: 'en', label: '🇬🇧 VO' },
-    ];
     return `
         <div class="player-controls">
             <div class="control-row">
@@ -512,16 +499,8 @@ function createLangSelector() {
                     </button>
                 `).join('')}
             </div>
-            <div class="control-row">
-                <span class="lang-label"><i class="fas fa-globe"></i> Langue :</span>
-                ${langs.map(l => `
-                    <button class="lang-btn ${currentLang === l.code ? 'active' : ''}" 
-                            data-lang="${l.code}" 
-                            onclick="changeLanguage('${l.code}')">
-                        ${l.label}
-                    </button>
-                `).join('')}
-                <span class="lang-hint"><i class="fas fa-info-circle"></i> Sélectionnez la langue dans le player vidéo</span>
+            <div class="control-row lang-hint-row">
+                <span class="lang-hint"><i class="fas fa-globe"></i> Pour le <strong>VF (Français)</strong> : dans le player, cliquez sur <strong>🔊 Audio</strong> ou <strong>🌐</strong> puis choisissez <strong>French</strong></span>
             </div>
         </div>
     `;
@@ -761,6 +740,5 @@ if (typeof window !== 'undefined') {
     window.showUserMenu = showUserMenu;
     window.closeUserMenu = closeUserMenu;
     window.hideSearchResults = hideSearchResults;
-    window.changeLanguage = changeLanguage;
     window.changeServer = changeServer;
 }

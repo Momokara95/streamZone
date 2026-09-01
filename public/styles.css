@@ -1343,8 +1343,7 @@ ul {
     color: var(--primary);
 }
 
-.server-btn,
-.lang-btn {
+.server-btn {
     padding: 0.3rem 0.7rem;
     background: rgba(255, 255, 255, 0.08);
     color: var(--text-secondary);
@@ -1356,30 +1355,39 @@ ul {
     white-space: nowrap;
 }
 
-.server-btn:hover,
-.lang-btn:hover {
+.server-btn:hover {
     background: rgba(229, 9, 20, 0.3);
     color: white;
     border-color: var(--primary);
 }
 
-.server-btn.active,
-.lang-btn.active {
+.server-btn.active {
     background: var(--primary);
     color: white;
     border-color: var(--primary);
     font-weight: 600;
 }
 
+.lang-hint-row {
+    background: rgba(229, 9, 20, 0.1);
+    border-radius: 8px;
+    padding: 0.5rem 0.8rem;
+    margin-top: 0.2rem;
+}
+
 .lang-hint {
-    color: #888;
-    font-size: 0.75rem;
-    font-style: italic;
-    margin-left: 0.5rem;
+    color: #ccc;
+    font-size: 0.8rem;
+    line-height: 1.4;
 }
 
 .lang-hint i {
-    margin-right: 0.2rem;
+    color: var(--primary);
+    margin-right: 0.3rem;
+}
+
+.lang-hint strong {
+    color: white;
 }
 
 /* Removed overlay styles - using inline player controls now */
