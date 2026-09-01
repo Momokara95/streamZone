@@ -1397,6 +1397,82 @@ ul {
     color: white;
 }
 
+/* ===== Providers Section (VF) ===== */
+.providers-section {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(229, 9, 20, 0.08);
+    border: 1px solid rgba(229, 9, 20, 0.2);
+    border-radius: 10px;
+}
+
+.providers-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.providers-title i {
+    color: var(--primary);
+}
+
+.provider-group {
+    margin-bottom: 0.6rem;
+}
+
+.provider-group:last-child {
+    margin-bottom: 0;
+}
+
+.provider-group-title {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.4rem;
+    display: block;
+}
+
+.provider-chips {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.provider-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.8rem;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    color: var(--text-primary);
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.provider-chip:hover {
+    background: rgba(229, 9, 20, 0.3);
+    border-color: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.provider-logo {
+    width: 22px;
+    height: 22px;
+    border-radius: 4px;
+    object-fit: contain;
+}
+
 /* Removed overlay styles - using inline player controls now */
 
 @media (max-width: 768px) {

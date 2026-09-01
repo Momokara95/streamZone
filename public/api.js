@@ -23,7 +23,7 @@ const moviesAPI = {
     },
 
     async getById(id) {
-        const d = await tmdbFetch(`/movie/${id}?language=fr-FR&append_to_response=videos,similar`);
+        const d = await tmdbFetch(`/movie/${id}?language=fr-FR&append_to_response=videos,similar,watch_providers`);
         d.poster_url = d.poster_path ? `${TMDB_IMG}/w500${d.poster_path}` : null;
         d.backdrop_url = d.backdrop_path ? `${TMDB_IMG}/original${d.backdrop_path}` : null;
         if (d.videos?.results) {
@@ -54,7 +54,7 @@ const seriesAPI = {
     },
 
     async getById(id) {
-        const d = await tmdbFetch(`/tv/${id}?language=fr-FR&append_to_response=videos,similar`);
+        const d = await tmdbFetch(`/tv/${id}?language=fr-FR&append_to_response=videos,similar,watch_providers`);
         d.poster_url = d.poster_path ? `${TMDB_IMG}/w500${d.poster_path}` : null;
         d.backdrop_url = d.backdrop_path ? `${TMDB_IMG}/original${d.backdrop_path}` : null;
         if (d.videos?.results) {

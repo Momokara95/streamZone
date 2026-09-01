@@ -375,6 +375,14 @@ async function showContentModal(type, id) {
         if (existingFavBtn) existingFavBtn.remove();
         modalInfo.appendChild(favBtn);
 
+        // Afficher les plateformes de streaming (VF)
+        const providers = createProvidersSection(data, type);
+        if (providers) {
+            const existingProviders = modalInfo.querySelector('.providers-section');
+            if (existingProviders) existingProviders.remove();
+            modalInfo.insertAdjacentHTML('beforeend', providers);
+        }
+
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
 
@@ -484,6 +492,78 @@ async function showAnimeModal(id) {
 }
 
 // ===== Fonctions épisodes =====
+
+// Section plateformes de streaming (VF)
+function createProvidersSection(data, type) {
+    const watchProviders = data.watch_providers?.results?.FR || data.watch_providers?.results?.US || {};
+    const { flatrate = [], rent = [], buy = [], link } = watchProviders;
+    
+    if (!flatrate.length && !rent.length && !buy.length) return null;
+
+    // Icônes des plateformes
+    const platformIcons = {
+        'Netflix': '🎬',
+        'Disney Plus': '🏰',
+        'Amazon Prime Video': '📦',
+        'Amazon Video': '📦',
+        'Canal+': '📺',
+        'Apple TV Plus': '🍎',
+        'Apple TV Store': '🍎',
+        'Google Play Movies': '🎵',
+        'YouTube': '▶️',
+        'Rakuten TV': '🔴',
+        'Orange VOD': '🟠',
+        'Molotov TV': '📺',
+        'Arte': '🎭',
+        'Paramount Plus': '⭐',
+        'HBO Max': '🎭',
+        'Plex': '📺',
+    };
+
+    const platformUrls = {
+        'Netflix': 'https://www.netflix.com',
+        'Disney Plus': 'https://www.disneyplus.com',
+        'Amazon Prime Video': 'https://www.primevideo.com',
+        'Amazon Video': 'https://www.amazon.com/video',
+        'Canal+': 'https://www.canalplus.com',
+        'Apple TV Plus': 'https://tv.apple.com',
+        'Apple TV Store': 'https://tv.apple.com',
+        'Google Play Movies': 'https://play.google.com/store/movies',
+        'YouTube': 'https://www.youtube.com',
+        'Rakuten TV': 'https://rakuten.tv',
+        'Arte': 'https://www.arte.tv',
+        'Paramount Plus': 'https://www.paramountplus.com',
+        'Plex': 'https://www.plex.tv',
+    };
+
+    function renderProviderList(title, providers) {
+        if (!providers.length) return '';
+        return `
+            <div class="provider-group">
+                <span class="provider-group-title">${title}</span>
+                <div class="provider-chips">
+                    ${providers.map(p => {
+                        const icon = platformIcons[p.provider_name] || '📺';
+                        const url = platformUrls[p.provider_name] || link || '#';
+                        return `<a href="${url}" target="_blank" rel="noopener" class="provider-chip" title="Regarder sur ${p.provider_name}">
+                            <img src="https://image.tmdb.org/t/p/w45${p.logo_path}" alt="${p.provider_name}" class="provider-logo" onerror="this.style.display='none'">
+                            <span>${p.provider_name}</span>
+                        </a>`;
+                    }).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    let html = '<div class="providers-section">';
+    html += '<div class="providers-title"><i class="fas fa-tv"></i> Regarder en VF sur :</div>';
+    html += renderProviderList('En streaming', flatrate);
+    html += renderProviderList('En location', rent);
+    html += renderProviderList('En achat', buy);
+    html += '</div>';
+    
+    return html;
+}
 
 // Bandeau d'instruction pour changer la langue
 function createLangSelector() {
