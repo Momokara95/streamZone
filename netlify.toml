@@ -1,5 +1,6 @@
 [build]
-  publish = "public"
+  publish = "src/public"
+  functions = "src/netlify/functions"
 
 [build.environment]
   NODE_VERSION = "18"
@@ -14,3 +15,4 @@
 [[edge_functions]]
   path = "/api/tmdb/*"
   function = "tmdb-proxy"
+  directory = "src/netlify/edge-functions"
